@@ -3,11 +3,9 @@ const url = `http://localhost:3000/toys`
 const addBtn = document.querySelector("#new-toy-btn");
 const toyFormContainer = document.querySelector(".container");
 const collection = document.querySelector('div#toy-collection')
-
+const form = document.querySelector('form')
 
 document.addEventListener("DOMContentLoaded", () => {
-  
-  
   addBtn.addEventListener("click", () => {
     // hide & seek with the form
     addToy = !addToy;
@@ -19,20 +17,92 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-  
+collection.addEventListener('click', function(e){
+  const toyLikes = e.target.offsetParent.childElementCount
+  if (e.target === 'like-btn') {
+    console.log('Like button clicked!!')
+    toyLikes ++
+    // likesDisplay.textContent = `${likes + 1} likes` // optimistic rendering
 
-function renderAllToys() {
-  return fetch(url)
-  .then(res => res.json())
-  .then(toys => {
-    toys.forEach(toy => renderOneToy(toy))
-    // console.log(toy)
-})
+    fetch(url, {
+          method: 'PATCH',
+          headers:
+          {
+            "Content-Type": "application/json",
+            Accept: "application/json"
+          },
+            body: JSON.stringify({
+              "likes": likes + 1
+            })
+        })
+        .then(res => res.json())
+        .then((likes) => {
+          e.target.offsetParent.childElementCount.innerText = `${toylikes}`
+
+        })
 }
 
-function renderOneToy (toy){
-  const card = document.createElement('div')
-  card.className = 'toy-card'
+// function increaseLikes(e){
+//   fetch(url, {
+//     method: 'PATCH',
+//     headers:
+//     {
+//       "Content-Type": "application/json",
+//       Accept: "application/json"
+//     },
+//       body: JSON.stringify({
+//         "likes": likes + 1
+//       })
+//   })
+//   .then(res => res.json())
+//   .then((likes) => {
+//   })
+// }
+
+
+function addNewToy(toy_info){
+  fetch (url, {
+    method: 'POST',
+    headers:
+    {
+      'Content-Type': "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      "name": toy_info.name.value,
+      "image": toy_info.image.value,
+      "likes": 0
+    })
+  }) 
+  .then(res => res.json())
+  .then((toyForm) => {
+    let newToy = renderOneToy(toyForm)
+    collection.append(newToy)
+    form.reset
+  })
+  }
+
+
+form.addEventListener('submit', function(e){
+  e.preventDefault()
+  addNewToy(e.target)
+  form.reset
+  // document.getElementById("myForm").reset()
+})
+
+  
+  function renderAllToys() {
+    return fetch(url)
+    .then(res => res.json())
+    .then(toys => {
+      toys.forEach(toy => renderOneToy(toy))
+    })
+  }
+  
+
+  function renderOneToy (toy){
+    const card = document.createElement('div')
+    card.className = 'toy-card'
   card.dataset.id = toy.id
   let image = document.createElement(`img`)
   image.setAttribute('src', toy.image)
